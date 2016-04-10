@@ -7,9 +7,9 @@ module.exports = function(app) {
     require('./routes/logout.js')(app)
     require('./routes/guest.js')(app)
 
-    app.get('*',isLoggedIn, function(req, res){
-      console.log("404 happened in routes");
-    });
+    // app.get('*',isLoggedIn, function(req, res){
+    //   console.log("404 happened in routes");
+    // });
 
     
 };
