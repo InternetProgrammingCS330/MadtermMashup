@@ -20,10 +20,10 @@ myApp.config(['$stateProvider', '$urlRouterProvider', '$httpProvider',
                         console.log("4010401401401");
                         $location.url('/');
                     }
-                    if (response.status === 404){
-                        console.log("4040404040404");
-                        $location.url('/404');
-                    } 
+                    // if (response.status === 404){
+                    //     console.log("4040404040404");
+                    //     $location.url('/404');
+                    // } 
                     return $q.reject(response); 
                 } 
             };
@@ -73,6 +73,6 @@ myApp.config(['$stateProvider', '$urlRouterProvider', '$httpProvider',
 
             $urlRouterProvider.when('','/');
 
-            $urlRouterProvider.otherwise('/404');
+            // $urlRouterProvider.otherwise('/404');
     }
 ]);

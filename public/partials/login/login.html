@@ -1,46 +1,62 @@
-<!DOCTYPE html>
-<html ng-app="LoginApp">
-  <head>
-    <meta charset="UTF-8">
-    <title>Luther College Lost and Found</title>
-    <link rel="stylesheet" href="/partials/login/login.css">
-  </head>
+<!--Add a button for the user to click to initiate auth sequence -->
+    <button id="authorize-button" style="visibility: hidden">Authorize</button>
+    <script type="text/javascript">
 
-  <body layout="column">
-    <div class="webpage" ng-controller="loginController">
-    <md-toolbar flex="66" id="header_bar">
-    <div id=titles>
-      <h1 id=title1 >Luther College</h1>
-      <h3 id=title2 >Lost and Found</h3>
-    </div>
-    </md-toolbar>
-    <div layout-align="center start" layout="row">
-      <md-card class="background move-up" flex="66">
-      <md-card-header>
-        <md-card-avatar>
-          <img src="/partials/login/Luther_Norse.jpg" class="md-user-avatar" id="norse">
-        </md-card-avatar>
-        </md-card-header>
-          <md-card-actions class="forms">
-            <form id="form">
-              <div class="group">
-                <input type="text" required ng-model="login.username"><span class="highlight"></span><span class="bar"></span>
-                <label>Username</label>
-              </div>
-              <div class="group">
-                 <input type="password" required ng-model="login.password"><span class="highlight"></span><span class="bar"></span>
-                <label>Password</label>
-              </div>
-              <div class="buttonHolder">
-                  <md-button class="btn1" type="submit" id="login-button" ng-click="loginSubmit(login)">Login</md-button>
-                  <md-button class="btn2" type="submit" id="login-button" ng-click="guestLoginSubmit()">Login as Guest</md-button>
-                  <a href="https://accounts.google.com/o/oauth2/v2/auth?response_type=token&client_id=403395753267-m5bosciaf32n6tmr4otncqigvfd3b2lr.apps.googleusercontent.com&redirect_uri=http://127.0.0.1:3000&scope=email%20profile" class="button">Go to Google</a>
-              </div>
-              </form>
-            </md-card-actions>
-          </md-card>
-        </md-content>
-      </div>
-    </div>
-  </body>
-</html>
+      var clientId = '403395753267-m5bosciaf32n6tmr4otncqigvfd3b2lr.apps.googleusercontent.com';
+
+      var apiKey = 'AIzaSyAQSFbNgx0Xs-faGH6o2YxTrlQe9Ds-d94';
+
+      var scopes = 'https://www.googleapis.com/auth/hangout.data';
+
+      function handleClientLoad() {
+        // Step 2: Reference the API key
+        gapi.client.setApiKey(apiKey);
+        window.setTimeout(checkAuth,1);
+      }
+
+      function checkAuth() {
+        gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: true}, handleAuthResult);
+      }
+
+      function handleAuthResult(authResult) {
+        var authorizeButton = document.getElementById('authorize-button');
+        if (authResult && !authResult.error) {
+          authorizeButton.style.visibility = 'hidden';
+          makeApiCall();
+        } else {
+          authorizeButton.style.visibility = '';
+          authorizeButton.onclick = handleAuthClick;
+        }
+      }
+
+      function handleAuthClick(event) {
+        // Step 3: get authorization to use private data
+        gapi.auth.authorize({client_id: clientId, scope: scopes, immediate: false}, handleAuthResult);
+        return false;
+      }
+
+      // Load the API and make an API call.  Display the results on the screen.
+      function makeApiCall() {
+        // Step 4: Load the Google+ API
+        gapi.client.load('plus', 'v1').then(function() {
+          // Step 5: Assemble the API request
+          var request = gapi.client.plus.people.get({
+            'userId': 'me'
+          });
+          // Step 6: Execute the API request
+          request.then(function(resp) {
+            var heading = document.createElement('h4');
+            var image = document.createElement('img');
+            image.src = resp.result.image.url;
+            heading.appendChild(image);
+            heading.appendChild(document.createTextNode(resp.result.displayName));
+
+            document.getElementById('content').appendChild(heading);
+          }, function(reason) {
+            console.log('Error: ' + reason.result.error.message);
+          });
+        });
+      }
+    </script>
+    // Step 1: Load JavaScript client library
+    <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
