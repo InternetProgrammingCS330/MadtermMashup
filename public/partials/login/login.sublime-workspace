@@ -1,0 +1,263 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"desc",
+				"description"
+			],
+			[
+				"guest",
+				"guestController"
+			],
+			[
+				"tit",
+				"title"
+			],
+			[
+				"title",
+				"title_relevance"
+			],
+			[
+				"des",
+				"description"
+			],
+			[
+				"build",
+				"building_name"
+			],
+			[
+				"location",
+				"locationID"
+			],
+			[
+				"itemI",
+				"itemTitle"
+			],
+			[
+				"curren",
+				"current_search"
+			],
+			[
+				"uib",
+				"uibModalInstance"
+			],
+			[
+				"refr",
+				"refreshMain"
+			],
+			[
+				"share",
+				"sharedService"
+			],
+			[
+				"shared",
+				"sharedProperties"
+			],
+			[
+				"lo",
+				"locationlist"
+			],
+			[
+				"Guest",
+				"guestApp"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"console":
+	{
+		"height": 0.0,
+		"history":
+		[
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/miriam/Lost-and-Found/api/routes/search.js",
+		"/home/miriam/Lost-and-Found/testBuild.sql",
+		"/home/miriam/Lost-and-Found/api/routes/guest.js",
+		"/home/miriam/Lost-and-Found/public/controllers/navBarController.js",
+		"/home/miriam/Lost-and-Found/public/partials/login/login.css",
+		"/home/miriam/Lost-and-Found/public/partials/guest/guestNav.html",
+		"/home/miriam/Lost-and-Found/api/routes/additem.js",
+		"/home/miriam/Lost-and-Found/public/partials/login/Norsehead.jpg",
+		"/home/miriam/Documents/btree.py",
+		"/home/miriam/Lost-and-Found/public/partials/login/login.html",
+		"/home/miriam/Lost-and-Found/public/controllers/guestController.js",
+		"/home/miriam/Lost-and-Found/public/partials/guest/guest.html",
+		"/home/miriam/Lost-and-Found/public/index.html",
+		"/home/miriam/Lost-and-Found/public/controllers/itemlistController.js",
+		"/home/miriam/Lost-and-Found/api/routes/itemlist.js",
+		"/home/miriam/Lost-and-Found/build.sql",
+		"/home/miriam/Lost-and-Found/public/partials/itemList/itemList.html",
+		"/home/miriam/Lost-and-Found/public/controllers/main_controller.js",
+		"/home/miriam/Lost-and-Found/public/partials/navBar/navBar.html",
+		"/home/miriam/Lost-and-Found/public/partials/search/searchItem.html",
+		"/home/miriam/Lost-and-Found/public/controllers/searchItemController.js",
+		"/home/miriam/Lost-and-Found/server.js",
+		"/home/miriam/Lost-and-Found/public/controllers/logincontroller.js",
+		"/home/miriam/Lost-and-Found/public/partials/guest/guest.css",
+		"/home/miriam/Lost-and-Found/api/routes/login.js",
+		"/home/miriam/SeniorProject/public/controllers/guestController.js",
+		"/home/miriam/SeniorProject/public/partials/search/searchItem.html",
+		"/home/miriam/SeniorProject/public/controllers/searchItemController.js",
+		"/home/miriam/SeniorProject/api/routes/search.js",
+		"/home/miriam/SeniorProject/public/controllers/navBarController.js",
+		"/home/miriam/SeniorProject/public/partials/guest/guest.html",
+		"/home/miriam/SeniorProject/public/partials/guest/guest.css",
+		"/home/miriam/SeniorProject/api/routes/guest.js",
+		"/home/miriam/SeniorProject/public/controllers/main_controller.js",
+		"/home/miriam/SeniorProject/public/partials/search/searchItem.css",
+		"/home/miriam/.config/sublime-text-3/Packages/Default/Preferences.sublime-settings",
+		"/home/miriam/SeniorProject/public/partials/login/login.html",
+		"/home/miriam/SeniorProject/public/index.html"
+	],
+	"find":
+	{
+		"height": 25.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"zmq"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 25.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"pinned_build_system": "",
+	"project": "login.sublime-project",
+	"replace":
+	{
+		"height": 46.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 174.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

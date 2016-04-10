@@ -1,0 +1,33 @@
+{
+  "name": "MadMash",
+  "version": "0.0.1",
+  "description": "CS330 Internet Programming Madterm Mashup @ Luther College",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.10.2",
+    "express": "^4.11.1",
+    "path": "^0.12.7",
+    "ejs": "^2.3.2",
+    "cookie-parser": "~1.0.0",
+    "express-session": "~1.0.0",
+  },
+  "devDependencies": {
+    "chai": "^3.3.0",
+    "mocha": "^2.3.3",
+    "superagent": "^1.4.0"
+  },
+  "scripts": {
+    "test": "mocha --recursive -R nyan",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/InternetProgrammingCS330/MadtermMashup.git"
+  },
+  "author": "",
+  "license": "GNU",
+  "bugs": {
+    "url": "https://github.com/InternetProgrammingCS330/MadtermMashup/Issues"
+  },
+  "homepage": "https://github.com/InternetProgrammingCS330/MidtermMashup"
+}
