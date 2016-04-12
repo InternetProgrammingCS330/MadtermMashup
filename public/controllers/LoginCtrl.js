@@ -116,6 +116,9 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		        	// console.log("MESSAGE",allMessages[allMessages.length-1]);
 		        	var sender = appendPre(allMessages[allMessages.length-1].payload.headers[0].value.split("<")[0]);
 		        	var snippet = allMessages[allMessages.length-1].snippet;
+		        	if (snippet.length > 20) {
+		        		snippet = snippet.substring(0,17) + "..."
+		        	}
 		        	var historyId = allMessages[allMessages.length-1].historyId;
 		        	var messageID = allMessages[allMessages.length-1].id;
 		        	var newMessage = {sender: sender,
