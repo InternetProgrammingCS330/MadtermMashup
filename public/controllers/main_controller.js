@@ -11,25 +11,25 @@ var myApp = angular.module('MashApp', ['ui.router','ngMaterial',
 myApp.config(['$stateProvider', '$urlRouterProvider', '$httpProvider',
     function($stateProvider,$urlRouterProvider,$httpProvider) {
 
-        var interceptor = ['$location', '$q', '$injector', function($location, $q, $injector) {
+        // var interceptor = ['$location', '$q', '$injector', function($location, $q, $injector) {
             
-            console.log("inside interceptor");
-            return {
-                responseError: function(response) { 
-                    if (response.status === 401){
-                        console.log("4010401401401");
-                        $location.url('/');
-                    }
-                    // if (response.status === 404){
-                    //     console.log("4040404040404");
-                    //     $location.url('/404');
-                    // } 
-                    return $q.reject(response); 
-                } 
-            };
-        }];
+        //     console.log("inside interceptor");
+        //     return {
+        //         responseError: function(response) { 
+        //             if (response.status === 401){
+        //                 console.log("4010401401401");
+        //                 $location.url('/');
+        //             }
+        //             // if (response.status === 404){
+        //             //     console.log("4040404040404");
+        //             //     $location.url('/404');
+        //             // } 
+        //             return $q.reject(response); 
+        //         } 
+        //     };
+        // }];
 
-        $httpProvider.interceptors.push(interceptor);
+        // $httpProvider.interceptors.push(interceptor);
 
         $stateProvider
             .state('login',{
