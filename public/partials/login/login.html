@@ -63,31 +63,44 @@
       var unreadCount = 0;
 
       function getInboxStats() {
-        var request = gapi.client.gmail.users.threads.get({
+        var request = gapi.client.gmail.users.threads.list({
           'userId': 'me',
-          'historyId': "989745",
-          'id':"15407ce71c2b0eac"
+          'q': 'in:chat',
+          'maxResults':5
         });
+
+        // {
+        //   'userId': 'me',
+        //   'historyId': "989745",
+        //   'id':"15407ce71c2b0eac"
+        // });
 
         request.execute(function(resp) {
 
-          console.log("RESPONSE",resp);
-          unreadIds = resp.messages;
+          var allThreads = resp.threads;
+          console.log("RESPONSE",allThreads);
 
-          if (unreadIds.length>0) {
+          if (allThreads.length>0) {
             console.log("MESSAGES FOUND");
-            unreadCount = unreadIds.length;
-            for (var id = 0; id < unreadCount; id++) {
-              var requestMessage = gapi.client.gmail.users.messages.get({
+            threadCount = allThreads.length;
+            for (var id = 0; id < threadCount; id++) {
+              var requestMessage = gapi.client.gmail.users.threads.get({
                 'userId': 'me',
-                'id':unreadIds[id].id,
-                'format':'full'
+                'historyId': allThreads[id].historyId,
+                'id':allThreads[id].id
               });
 
               requestMessage.execute(function(respMessage) {
                 console.log("MESSAGE",respMessage);
 
-                appendPre(getBody(respMessage.payload));
+                var allMessages = respMessage.messages;
+
+                for (var message = 0; message < allMessages.length; message++) {
+                  console.log(allMessages[message].payload.headers[0].value)
+                  appendPre(allMessages[message].payload.headers[0].value);
+                }
+
+                // appendPre(getBody(respMessage.payload));
               });
               
             }
