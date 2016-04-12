@@ -46,31 +46,53 @@
       }
 
       function loadGmailApi() {
-        gapi.client.load('gmail', 'v1', listLabels);
+        gapi.client.load('gmail', 'v1', getInboxStats);
       }
 
       /**
        * Print all Labels in the authorized user's inbox. If no labels
        * are found an appropriate message is printed.
        */
-      function listLabels() {
-        var request = gapi.client.gmail.users.messages.list({
-          'userId': 'me'
+
+
+// For the extension get the number of unread messages
+// Show that number in the extension icon
+
+      var unreadIds;
+      var unreadMessages;
+      var unreadCount = 0;
+
+      function getInboxStats() {
+        var request = gapi.client.gmail.users.threads.get({
+          'userId': 'me',
+          'historyId': "989745",
+          'id':"15407ce71c2b0eac"
         });
 
         request.execute(function(resp) {
 
           console.log("RESPONSE",resp);
-          var labels = resp.labels;
-          appendPre('Labels:');
+          unreadIds = resp.messages;
 
-          if (labels.length > 0) {
-            for (i = 0; i < labels.length; i++) {
-              var label = labels[i];
-              appendPre(label.name)
+          if (unreadIds.length>0) {
+            console.log("MESSAGES FOUND");
+            unreadCount = unreadIds.length;
+            for (var id = 0; id < unreadCount; id++) {
+              var requestMessage = gapi.client.gmail.users.messages.get({
+                'userId': 'me',
+                'id':unreadIds[id].id,
+                'format':'full'
+              });
+
+              requestMessage.execute(function(respMessage) {
+                console.log("MESSAGE",respMessage);
+
+                appendPre(getBody(respMessage.payload));
+              });
+              
             }
           } else {
-            appendPre('No Labels found.');
+            console.log("No unread Messages");
           }
 
           // var request = gapi.client.gmail.users.messages.get({
@@ -79,8 +101,40 @@
           // });
 
           // request.execute(function(resp) {
-          
+
         });
+      }
+
+      function getBody(message) {
+        var encodedBody = '';
+        if(typeof message.parts === 'undefined')
+        {
+          encodedBody = message.body.data;
+        }
+        else
+        {
+          encodedBody = getHTMLPart(message.parts[0]);
+        }
+        encodedBody = encodedBody.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, '');
+        return decodeURIComponent(escape(window.atob(encodedBody)));
+      }
+
+      function getHTMLPart(arr) {
+        for(var x = 0; x <= arr.length; x++)
+        {
+          if(typeof arr[x].parts === 'undefined')
+          {
+            if(arr[x].mimeType === 'text/html')
+            {
+              return arr[x].body.data;
+            }
+          }
+          else
+          {
+            return getHTMLPart(arr[x].parts);
+          }
+        }
+        return '';
       }
 
       /**
@@ -96,5 +150,4 @@
       }
 
     </script>
-    // Step 1: Load JavaScript client library
     <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
