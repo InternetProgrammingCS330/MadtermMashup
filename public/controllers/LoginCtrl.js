@@ -1,15 +1,27 @@
 var app = angular.module('LoginApp',['ngMaterial']);
 
+var chatAPI = "http://www.personalityforge.com/api/chat/?apiKey=l248iw9xLwtAo5Hi&chatBotID=6&message=How+are+you+doing+today%3F&externalID=abc-639184572&firstName=Alex&lastName=Sparrow&gender=m";
 
 var CLIENT_ID = '403395753267-m5bosciaf32n6tmr4otncqigvfd3b2lr.apps.googleusercontent.com';
 
 var apiKey = 'AIzaSyAQSFbNgx0Xs-faGH6o2YxTrlQe9Ds-d94';
 
+var sampleChatResponse = {"success":1,"errorMessage":"","message":{"chatBotName":"Desti","chatBotID":null,"message":"So you say.","emotion":"normal"}}
+console.log(sampleChatResponse);
 var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly',
   'https://www.googleapis.com/auth/gmail.send',
   'https://www.googleapis.com/auth/gmail.modify',
   'https://www.googleapis.com/auth/gmail.compose'
 ];
+
+// function reqListener () {
+//   console.log(this.responseText);
+// }
+
+// var oReq = new XMLHttpRequest();
+// oReq.addEventListener("load", reqListener);
+// oReq.open("GET", chatAPI);
+// oReq.send();
 
 // handleClientLoad();
 
@@ -61,16 +73,58 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
     var unreadMessages;
     var unreadCount = 0;
 
+    function messageListener(message){
+    	$scope.$applyAsync(function(){
+    		$scope.userMessages = message;
+    		console.log("HELLO FROM THE LISTENER",message);
+    	})
+    }
+
+    function chatListener(message){
+    	$scope.$applyAsync(function(){
+    		$scope.chatMessages.messages = message;
+    		console.log("HELLO FROM CHAT THE LISTENER",message);
+    	})
+    }
+
     function refresh(){
-    	var newMessages = getInboxStats();
-    	console.log($rootScope.newMessages);
-    	// $scope.userMessages = newMessages;
+    	getInboxStats();
     }
 
     $scope.refreshUnread = function(){
-    	var newMessages = getInboxStats();
-    	console.log($rootScope.newMessages)
-    	// $scope.userMessages = newMessages;
+    	getInboxStats();
+    };
+
+    $scope.chatMessages = {
+    		messages:[]
+    	};
+
+    $scope.initiateChat = function(item){
+    	
+    	console.log(item);
+    	var request = gapi.client.gmail.users.messages.get({
+		  'userId': 'me',
+		  'id':item.id
+		});
+		var messageRAW;
+		request.execute(function(resp) {
+			console.log("RAW",resp)
+			var decodedMessage = getBody(resp.payload);
+			console.log("TEXT",decodedMessage);
+
+			// {
+   //  		message:"hello",
+   //  		color:"#CCFF90"
+   //  	},{
+   //  		message:"hi",
+   //  		color:"#FFD180"
+   //  	}
+   //  ]
+   			var messages = []
+			messages.push({'message':decodedMessage,color:'#CCFF90'});
+			chatListener(messages)
+		  // messageRAW = resp.emailAddress;
+		});
     };
 
     var getInboxStats = function() {
@@ -117,7 +171,7 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		        	var sender = appendPre(allMessages[allMessages.length-1].payload.headers[0].value.split("<")[0]);
 		        	var snippet = allMessages[allMessages.length-1].snippet;
 		        	if (snippet.length > 20) {
-		        		snippet = snippet.substring(0,17) + "..."
+		        		snippet = snippet.substring(0,40) + "..."
 		        	}
 		        	var historyId = allMessages[allMessages.length-1].historyId;
 		        	var messageID = allMessages[allMessages.length-1].id;
@@ -127,6 +181,7 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		        						id:messageID};
 		          	userMessages.push(newMessage);
 		        	$rootScope.userMessages = userMessages;
+		        	messageListener(userMessages);
 		        	console.log("ROOTSCOPE INSIDE",$rootScope.userMessages);
 		        }
 		      });
@@ -135,10 +190,11 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		  else {
 		    // console.log("No unread Messages");
 		    userMessages.push({snippet:"NO MESSAGES FOUND"});
+		    messageListener(userMessages);
 		  }
 		});
-		console.log("RETURN",userMessages)
-		return userMessages;
+		
+		// return userMessages;
 	}
 	// $scope.userMessages = userMessages;
 	$scope.kent = "KENT"
