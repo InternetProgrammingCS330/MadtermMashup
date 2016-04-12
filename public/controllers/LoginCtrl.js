@@ -7,7 +7,7 @@ var CLIENT_ID = '403395753267-m5bosciaf32n6tmr4otncqigvfd3b2lr.apps.googleuserco
 var apiKey = 'AIzaSyAQSFbNgx0Xs-faGH6o2YxTrlQe9Ds-d94';
 
 var sampleChatResponse = {"success":1,"errorMessage":"","message":{"chatBotName":"Desti","chatBotID":null,"message":"So you say.","emotion":"normal"}}
-console.log(sampleChatResponse);
+
 var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly',
   'https://www.googleapis.com/auth/gmail.send',
   'https://www.googleapis.com/auth/gmail.modify',
@@ -67,24 +67,74 @@ var init = function() {
 
 
 app.controller('loginController', function($timeout, $scope, $http, $location, $rootScope, $window,gapiService) {
- 	console.log("HELLO FROM THE LOGIN CONTROLLER");
 
   	var unreadIds;
     var unreadMessages;
     var unreadCount = 0;
 
+    function sendMessage()
+	{
+	  var email = '';
+
+	  var headers_obj = {
+	    'To': "alevar@gmail.com",
+	    'Subject': "testing new api"
+	  }
+
+	  var message = "hello, i'm testing the new api";
+
+	  for(var header in headers_obj)
+	    email += header += ": "+headers_obj[header]+"\r\n";
+
+	  email += "\r\n" + message;
+
+	  var sendRequest = gapi.client.gmail.users.messages.send({
+	    'userId': 'me',
+	    'resource': {
+	      'raw': window.btoa(email).replace(/\+/g, '-').replace(/\//g, '_')
+	    }
+	  });
+
+	  return sendRequest.execute(function(resp){
+	  	console.log(resp);
+	  });
+	}
+
+    $scope.send = function(){
+  //   	var request = gapi.client.gmail.users.messages.send({
+		//   'userId': 'me'
+		// });
+		// var messageRAW = btoa("HELLO MY FRIEND");
+		// request.execute(function(resp) {
+		// 	console.log(resp);
+		// });
+
+		sendMessage();
+    }
+
     function messageListener(message){
     	$scope.$applyAsync(function(){
     		$scope.userMessages = message;
-    		console.log("HELLO FROM THE LISTENER",message);
     	})
     }
 
     function chatListener(message){
+    	var response = getResponseFromBot(message);
+
+    	var fullBotResponse = {
+    		'message':response.message.message,
+    		'color':'#FFD180',
+    		'sender':$rootScope.owner
+    	}
+
     	$scope.$applyAsync(function(){
     		$scope.chatMessages.messages = message;
-    		console.log("HELLO FROM CHAT THE LISTENER",message);
+    		$scope.chatMessages.messages.push(fullBotResponse)
     	})
+    }
+
+    function getResponseFromBot(){
+    	return sampleChatResponse;
     }
 
     function refresh(){
@@ -97,9 +147,12 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 
     $scope.chatMessages = {
     		messages:[]
-    	};
+   	};
 
     $scope.initiateChat = function(item){
+    	$scope.chatMessages = {
+    		messages:[]
+   		};
     	
     	console.log(item);
     	var request = gapi.client.gmail.users.messages.get({
@@ -108,22 +161,10 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		});
 		var messageRAW;
 		request.execute(function(resp) {
-			console.log("RAW",resp)
 			var decodedMessage = getBody(resp.payload);
-			console.log("TEXT",decodedMessage);
-
-			// {
-   //  		message:"hello",
-   //  		color:"#CCFF90"
-   //  	},{
-   //  		message:"hi",
-   //  		color:"#FFD180"
-   //  	}
-   //  ]
    			var messages = []
-			messages.push({'message':decodedMessage,color:'#CCFF90'});
+			messages.push({'message':decodedMessage,color:'#CCFF90','sender':item.sender.data});
 			chatListener(messages)
-		  // messageRAW = resp.emailAddress;
 		});
     };
 
@@ -137,12 +178,13 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 
 		request.execute(function(resp) {
 		  ownerEmail = resp.emailAddress;
+		  $rootScope.owner = ownerEmail;
 		});
 
 		request = gapi.client.gmail.users.threads.list({
 		  'userId': 'me',
 		  'q': 'in:chat',
-		  'maxResults':5
+		  'maxResults':6
 		});
 
 		var lastSenderEmail;
@@ -167,7 +209,6 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 
 		        lastSenderEmail = allMessages[allMessages.length-1].payload.headers[0].value.split("<")[1].slice(0,-1);
 		        if(lastSenderEmail != ownerEmail){
-		        	// console.log("MESSAGE",allMessages[allMessages.length-1]);
 		        	var sender = appendPre(allMessages[allMessages.length-1].payload.headers[0].value.split("<")[0]);
 		        	var snippet = allMessages[allMessages.length-1].snippet;
 		        	if (snippet.length > 20) {
@@ -182,22 +223,16 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		          	userMessages.push(newMessage);
 		        	$rootScope.userMessages = userMessages;
 		        	messageListener(userMessages);
-		        	console.log("ROOTSCOPE INSIDE",$rootScope.userMessages);
 		        }
 		      });
 		    }
 		  }
 		  else {
-		    // console.log("No unread Messages");
 		    userMessages.push({snippet:"NO MESSAGES FOUND"});
 		    messageListener(userMessages);
 		  }
 		});
-		
-		// return userMessages;
 	}
-	// $scope.userMessages = userMessages;
-	$scope.kent = "KENT"
 
 	function getBody(message) {
 		var encodedBody = '';
@@ -242,8 +277,6 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 	}
 
 	var postInitiation = function() {
-	    // load all your assets
-		// console.log("HELLO FROM CONTROLLER");
 		refresh();
 	}
 

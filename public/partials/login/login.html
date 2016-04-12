@@ -33,15 +33,20 @@
             </div> -->
           </td>
           <td>
-            <md-content>
-              <md-list>
-                <md-list-item class="md-3-line" ng-repeat="item in chatMessages.messages" ng-style="{background: item.color}">
-                  <div class="md-list-item-text">
-                    <p style="text-align: right;">{{item.message}}</p>
-                  </div>
-                </md-list-item>
-              </md-list>
-            </md-content>
+            <section class="module">
+              <md-content>
+                <md-list>
+                  <md-list-item class="md-3-line" ng-repeat="item in chatMessages.messages" ng-style="{background: item.color}">
+                    <div class="md-list-item-text" style="text-align: right;">
+                      <h2><b>{{item.sender}}</b></h2>
+                      <p>{{item.message}}</p>
+                    </div>
+                  </md-list-item>
+                </md-list>
+              </md-content>
+            </section>
+
+            
             <!-- <div layout-gt-xs="row">
               <md-input-container class="md-block" flex-gt-xs>
                 <label>Title</label>
@@ -55,11 +60,14 @@
               </md-input-container>
             </div> -->
             <md-dialog-actions layout="row">
-              <md-button class="md-raised md-primary" aria-label="refreshUnread" ng-click="refreshUnread()">refresh</md-button>
+              <md-button class="md-raised md-primary" aria-label="send" ng-click="send()">send</md-button>
             </md-dialog-actions>
           </td>
         </tr>
       </table>
+      <md-dialog-actions layout="row">
+        <md-button class="md-raised md-primary" aria-label="refreshUnread" ng-click="refreshUnread()">refresh</md-button>
+      </md-dialog-actions>
       <button id="authorize-button" style="visibility: hidden">Authorize</button>
       <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
     </div>
