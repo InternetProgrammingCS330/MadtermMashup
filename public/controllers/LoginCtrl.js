@@ -1,4 +1,4 @@
-var app = angular.module('LoginApp',[]);
+var app = angular.module('LoginApp',['ngMaterial']);
 
 
 var CLIENT_ID = '403395753267-m5bosciaf32n6tmr4otncqigvfd3b2lr.apps.googleusercontent.com';
@@ -61,81 +61,84 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
     var unreadMessages;
     var unreadCount = 0;
 
-    function getInboxStats() {
+    function refresh(){
+    	var newMessages = getInboxStats();
+    	console.log($rootScope.newMessages);
+    	// $scope.userMessages = newMessages;
+    }
 
-	var request = gapi.client.gmail.users.getProfile({
-	  'userId': 'me',
-	});
+    $scope.refreshUnread = function(){
+    	var newMessages = getInboxStats();
+    	console.log($rootScope.newMessages)
+    	// $scope.userMessages = newMessages;
+    };
 
-	var ownerEmail;
+    var getInboxStats = function() {
 
-	request.execute(function(resp) {
-	  ownerEmail = resp.emailAddress;
-	  console.log("USER:",resp);
-	});
+		var request = gapi.client.gmail.users.getProfile({
+		  'userId': 'me',
+		});
 
+		var ownerEmail;
 
-	request = gapi.client.gmail.users.threads.list({
-	  'userId': 'me',
-	  'q': 'in:chat',
-	  'maxResults':10
-	});
+		request.execute(function(resp) {
+		  ownerEmail = resp.emailAddress;
+		});
 
-	// {
-	//   'userId': 'me',
-	//   'historyId': "989745",
-	//   'id':"15407ce71c2b0eac"
-	// });
+		request = gapi.client.gmail.users.threads.list({
+		  'userId': 'me',
+		  'q': 'in:chat',
+		  'maxResults':5
+		});
 
-	request.execute(function(resp) {
+		var lastSenderEmail;
+		var userMessages = [];
 
-	  var allThreads = resp.threads;
-	  console.log("RESPONSE",allThreads);
+		request.execute(function(resp) {
 
-	  if (allThreads.length>0) {
-	    console.log("MESSAGES FOUND");
-	    threadCount = allThreads.length;
-	    for (var id = 0; id < threadCount; id++) {
-	      var requestMessage = gapi.client.gmail.users.threads.get({
-	        'userId': 'me',
-	        'historyId': allThreads[id].historyId,
-	        'id':allThreads[id].id
-	      });
+		  var allThreads = resp.threads;
 
-	      requestMessage.execute(function(respMessage) {
-	        console.log("MESSAGE",respMessage);
+		  if (allThreads.length>0) {
+		    threadCount = allThreads.length;
+		    for (var id = 0; id < threadCount; id++) {
+		      var requestMessage = gapi.client.gmail.users.threads.get({
+		        'userId': 'me',
+		        'historyId': allThreads[id].historyId,
+		        'id':allThreads[id].id
+		      });
 
-	        var allMessages = respMessage.messages;
+		      requestMessage.execute(function(respMessage) {
 
-	        
-	        // if(allMessages[allMessages.length-1])
-	        var lastSenderEmail = allMessages[allMessages.length-1].payload.headers[0].value.split("<")[1].slice(0,-1);
-	        if(lastSenderEmail != ownerEmail){
-	          console.log(allMessages[allMessages.length-1].payload.headers[0].value.split("<")[0])
-	          appendPre(allMessages[allMessages.length-1].payload.headers[0].value.split("<")[0]);
-	        }
-	        
-	        // console.log(allMessages[allMessages.length-1].payload.headers[0].value.split("<")[1].slice(0,-1));
+		        var allMessages = respMessage.messages;
 
-
-	        // appendPre(getBody(respMessage.payload));
-	      });
-	      
-	    }
-	  }
-	  else {
-	    console.log("No unread Messages");
-	  }
-
-	  // var request = gapi.client.gmail.users.messages.get({
-	  //   'userId': 'me',
-	  //   'id':"153f7ba41317046f"
-	  // });
-
-	  // request.execute(function(resp) {
-
-	});
+		        lastSenderEmail = allMessages[allMessages.length-1].payload.headers[0].value.split("<")[1].slice(0,-1);
+		        if(lastSenderEmail != ownerEmail){
+		        	// console.log("MESSAGE",allMessages[allMessages.length-1]);
+		        	var sender = appendPre(allMessages[allMessages.length-1].payload.headers[0].value.split("<")[0]);
+		        	var snippet = allMessages[allMessages.length-1].snippet;
+		        	var historyId = allMessages[allMessages.length-1].historyId;
+		        	var messageID = allMessages[allMessages.length-1].id;
+		        	var newMessage = {sender: sender,
+		        						snippet:snippet,
+		        						historyId:historyId,
+		        						id:messageID};
+		          	userMessages.push(newMessage);
+		        	$rootScope.userMessages = userMessages;
+		        	console.log("ROOTSCOPE INSIDE",$rootScope.userMessages);
+		        }
+		      });
+		    }
+		  }
+		  else {
+		    // console.log("No unread Messages");
+		    userMessages.push({snippet:"NO MESSAGES FOUND"});
+		  }
+		});
+		console.log("RETURN",userMessages)
+		return userMessages;
 	}
+	// $scope.userMessages = userMessages;
+	$scope.kent = "KENT"
 
 	function getBody(message) {
 		var encodedBody = '';
@@ -176,13 +179,13 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 	function appendPre(message) {
 		var pre = document.getElementById('output');
 		var textContent = document.createTextNode(message + '\n');
-		pre.appendChild(textContent);
+		return textContent;
 	}
 
 	var postInitiation = function() {
 	    // load all your assets
-		console.log("HELLO FROM CONTROLLER");
-		getInboxStats();
+		// console.log("HELLO FROM CONTROLLER");
+		refresh();
 	}
 
 	$window.initGapi = function() {

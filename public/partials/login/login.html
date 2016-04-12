@@ -2,19 +2,14 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Luther College Lost and Found</title>
     <link rel="stylesheet" href="/partials/login/login.css">
   </head>
 
   <body layout="column">
     <div class="webpage" ng-controller="loginController">
+      <md-button class="md-raised md-primary" ng-repeat="it in userMessages">{{it.sender.data}}: &nbsp; {{it.snippet}}</md-button>
+      <md-button class="md-raised md-primary" aria-label="refreshUnread" ng-click="refreshUnread()">Refresh</md-button>
       <button id="authorize-button" style="visibility: hidden">Authorize</button>
-      <pre id="output"></pre>
-      <script type="text/javascript">
-        
-
-      
-      </script>
       <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
     </div>
   </body>
