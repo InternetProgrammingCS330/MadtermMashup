@@ -1,3 +1,9 @@
+pre {
+	float: left;
+}
+section {
+	float: right;
+}
 form {
 	width: 380px;
 	padding-left: 10px;
