@@ -1,18 +1,12 @@
-<!DOCTYPE html ng-app="LoginApp">
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="/partials/login/login.css">
-  </head>
-  <body layout="column" ng-cloak>
-    <div class="webpage" ng-controller="loginController">
+
+    <div ng-app="LoginApp" class="webpage" ng-controller="loginController" layout="column" ng-cloack>
       <md-toolbar class="md-theme-light">
         <h2 class="md-toolbar-tools">
           <span>HANGOUTS BOT</span>
         </h2>
       </md-toolbar>
       <md-content class="md-padding" layout-xs="column" layout="row">
-        <div flex-xs flex-gt-xs="50" layout="row">
+        <div flex-xs flex-gt-xs="50" layout="row" class="ng-cloak">
             
           <md-card>
             <md-toolbar md-scroll-shrink ng-if="true">
@@ -26,7 +20,7 @@
             <md-card-content>
               <md-list>
                 <md-list-item class="md-3-line" ng-repeat="item in userMessages">
-                  <div class="md-list-item-text">
+                  <div class="md-list-item-text" class="ng-cloak">
                     <h3>{{item.sender.data}}</h3>
                     <p>{{item.snippet}}</p>
                   </div>
@@ -37,7 +31,7 @@
               </md-list>
             </md-card-content>
             <md-card-actions layout="row" layout-align="end center">
-              <md-button class="md-raised md-primary" aria-label="refreshUnread" ng-click="refreshUnread()" style="bottom:0;">refresh</md-button>
+              <md-button class="md-raised md-primary" aria-label="refreshUnread" ng-click="refreshUnread()">refresh</md-button>
             </md-card-actions>
           </md-card>
            
@@ -70,6 +64,4 @@
       <button id="authorize-button" style="visibility: hidden">Authorize</button>
       <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
     </div>
-  </body>
-</html>
 

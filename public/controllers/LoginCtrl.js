@@ -72,6 +72,10 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
     var unreadMessages;
     var unreadCount = 0;
 
+    setInterval(function() {
+	  $scope.refreshUnread();
+	}, 7000);
+
     function sendMessage()
 	{
 	  var email = '';
@@ -95,7 +99,6 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 	  });
 
 	  return sendRequest.execute(function(resp){
-	  	console.log(resp);
 	  });
 	}
 
@@ -111,8 +114,20 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		sendMessage();
     }
 
+    jQuery.fn.sort = function() {  
+	    return this.pushStack( [].sort.apply( this, arguments ), []);  
+	};
+
+	function sortDate(a,b){  
+	    if (a.time_stamp == b.time_stamp){
+	    	return 0;
+	    }
+	    return a.time_stamp> b.time_stamp ? 1 : -1;
+	};
+
     function messageListener(message){
     	$scope.$applyAsync(function(){
+    		message=$(message).sort(sortDate);
     		$scope.userMessages = message;
     	})
     }
@@ -155,7 +170,6 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
     		messages:[]
    		};
     	
-    	console.log(item);
     	$scope.threadId = item.threadId;
     	var request = gapi.client.gmail.users.messages.get({
 		  'userId': 'me',
@@ -164,8 +178,7 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		var messageRAW;
 		request.execute(function(resp) {
 			$scope.sender = resp.payload.headers[0].value.split("<")[1].slice(0,-1)
-			console.log("INITIATED RESPONSE",$scope.sender)
-			var decodedMessage = getBody(resp.payload);
+			var decodedMessage = getBody(resp.payload).replace(/&#39;/g, "'");
    			var messages = []
 			messages.push({'message':decodedMessage,color:'#CCFF90','sender':item.sender.data});
 			chatListener(messages)
@@ -188,26 +201,28 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		request = gapi.client.gmail.users.threads.list({
 		  'userId': 'me',
 		  'q': 'in:chat',
-		  'maxResults':6
+		  'maxResults':5
 		});
 
 		var lastSenderEmail;
-		var userMessages = [];
+		$scope.userMessagesRAW = [];
 
 		request.execute(function(resp) {
+			$scope.complete = false;
 
 		  var allThreads = resp.threads;
 
 		  if (allThreads.length>0) {
 		    threadCount = allThreads.length;
 		    for (var id = 0; id < threadCount; id++) {
+		    	$scope.$applyAsync(function(){
+			    	$scope.idRAW = id;		    		
+		    	});
 		      var requestMessage = gapi.client.gmail.users.threads.get({
 		        'userId': 'me',
 		        'historyId': allThreads[id].historyId,
 		        'id':allThreads[id].id
 		      });
-
-		      console.log("RAW MESSAGE",resp)
 
 		      requestMessage.execute(function(respMessage) {
 
@@ -218,18 +233,24 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 
 		        	var sender = appendPre(allMessages[allMessages.length-1].payload.headers[0].value.split("<")[0]);
 		        	var snippet = allMessages[allMessages.length-1].snippet;
-		        	if (snippet.length > 20) {
+		        	if (snippet.length > 40) {
 		        		snippet = snippet.substring(0,40) + "..."
 		        	}
 		        	var historyId = allMessages[allMessages.length-1].historyId;
+		        	var time_stamp = allMessages[allMessages.length-1].internalDate;
+		        	console.log("ALL MESSAGES",time_stamp);
 		        	var messageID = allMessages[allMessages.length-1].id;
 		        	var newMessage = {sender: sender,
-		        						snippet:snippet,
+		        						snippet:snippet.replace(/&#39;/g, "'"),
 		        						historyId:historyId,
-		        						id:messageID};
-		          	userMessages.push(newMessage);
-		        	$rootScope.userMessages = userMessages;
-		        	messageListener(userMessages);
+		        						id:messageID,
+		        						time_stamp:time_stamp};
+		          	$scope.userMessagesRAW.push(newMessage);
+		          	
+		          	if(id == threadCount){
+		          		console.log("iteration",$scope.idRAW,"count",threadCount, "messages",$scope.userMessagesRAW);
+		          		messageListener($scope.userMessagesRAW);
+		          	}	
 		        }
 		      });
 		    }
