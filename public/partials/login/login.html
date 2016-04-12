@@ -7,67 +7,66 @@
   <body layout="column" ng-cloak>
     <div class="webpage" ng-controller="loginController">
       <md-toolbar class="md-theme-light">
-      <h2 class="md-toolbar-tools">
-        <span>HANGOUTS BOT</span>
-      </h2>
-    </md-toolbar>
-      <table>
-        <tr>
-          <td>
-            <md-content>
+        <h2 class="md-toolbar-tools">
+          <span>HANGOUTS BOT</span>
+        </h2>
+      </md-toolbar>
+      <md-content class="md-padding" layout-xs="column" layout="row">
+        <div flex-xs flex-gt-xs="50" layout="row">
+            
+          <md-card>
+            <md-toolbar md-scroll-shrink ng-if="true">
+              <div class="md-toolbar-tools">
+                <h3>
+                  <span>Messages To-Reply</span>
+                </h3>
+              </div>
+            </md-toolbar>
+            
+            <md-card-content>
               <md-list>
                 <md-list-item class="md-3-line" ng-repeat="item in userMessages">
                   <div class="md-list-item-text">
                     <h3>{{item.sender.data}}</h3>
                     <p>{{item.snippet}}</p>
                   </div>
-                  <md-button class="md-primary" ng-click="initiateChat(item)">start</md-button>
+                  
                   <md-divider ng-if="!$last"></md-divider>
+                  <md-button class="md-primary" ng-click="initiateChat(item)">start</md-button>
                 </md-list-item>
               </md-list>
-            </md-content>
-            <!-- div ng-cloak="">
-              <md-content layout-padding="">
-                <md-button class="md-raised md-primary" ng-repeat="it in userMessages">{{it.sender.data}}: &nbsp; {{it.snippet}}</md-button>
-              </md-content>
-            </div> -->
-          </td>
-          <td>
-            <section class="module">
-              <md-content>
-                <md-list>
-                  <md-list-item class="md-3-line" ng-repeat="item in chatMessages.messages" ng-style="{background: item.color}">
-                    <div class="md-list-item-text" style="text-align: right;">
-                      <h2><b>{{item.sender}}</b></h2>
-                      <p>{{item.message}}</p>
-                    </div>
-                  </md-list-item>
-                </md-list>
-              </md-content>
-            </section>
-
+            </md-card-content>
+            <md-card-actions layout="row" layout-align="end center">
+              <md-button class="md-raised md-primary" aria-label="refreshUnread" ng-click="refreshUnread()" style="bottom:0;">refresh</md-button>
+            </md-card-actions>
+          </md-card>
+           
+          <md-card>
+            <md-toolbar md-scroll-shrink ng-if="true">
+              <div class="md-toolbar-tools">
+                <h3>
+                  <span>Current Chat</span>
+                </h3>
+              </div>
+            </md-toolbar>
             
-            <!-- <div layout-gt-xs="row">
-              <md-input-container class="md-block" flex-gt-xs>
-                <label>Title</label>
-                <input ng-model="item.title">
-              </md-input-container>
-            </div>
-            <div layout-gt-xs="row">
-              <md-input-container class="md-block" flex-gt-xs>
-                <label>Title</label>
-                <input ng-model="item.title">
-              </md-input-container>
-            </div> -->
-            <md-dialog-actions layout="row">
-              <md-button class="md-raised md-primary" aria-label="send" ng-click="send()">send</md-button>
-            </md-dialog-actions>
-          </td>
-        </tr>
-      </table>
-      <md-dialog-actions layout="row">
-        <md-button class="md-raised md-primary" aria-label="refreshUnread" ng-click="refreshUnread()">refresh</md-button>
-      </md-dialog-actions>
+            <md-card-content>
+              <md-list>
+                <md-list-item class="md-3-line" ng-repeat="item in chatMessages.messages" ng-style="{background: item.color}">
+                  <div class="md-list-item-text" style="text-align: right;">
+                    <h2><b>{{item.sender}}</b></h2>
+                    <p>{{item.message}}</p>
+                  </div>
+                </md-list-item>
+              </md-list>
+            </md-card-content>
+            <md-card-actions layout="row" layout-align="end center">
+              <md-button class="md-raised md-primary" aria-label="send" ng-click="send()" >send</md-button>
+            </md-card-actions>
+          </md-card>
+             
+          </div>
+        </md-content>
       <button id="authorize-button" style="visibility: hidden">Authorize</button>
       <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
     </div>

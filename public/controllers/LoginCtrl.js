@@ -77,11 +77,10 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 	  var email = '';
 
 	  var headers_obj = {
-	    'To': "alevar@gmail.com",
-	    'Subject': "testing new api"
+	    'To': $scope.sender
 	  }
 
-	  var message = "hello, i'm testing the new api";
+	  var message = $scope.botResponse;
 
 	  for(var header in headers_obj)
 	    email += header += ": "+headers_obj[header]+"\r\n";
@@ -127,6 +126,8 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
     		'sender':$rootScope.owner
     	}
 
+    	$scope.botResponse = response.message.message;
+
     	$scope.$applyAsync(function(){
     		$scope.chatMessages.messages = message;
     		$scope.chatMessages.messages.push(fullBotResponse)
@@ -155,12 +156,15 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
    		};
     	
     	console.log(item);
+    	$scope.threadId = item.threadId;
     	var request = gapi.client.gmail.users.messages.get({
 		  'userId': 'me',
 		  'id':item.id
 		});
 		var messageRAW;
 		request.execute(function(resp) {
+			$scope.sender = resp.payload.headers[0].value.split("<")[1].slice(0,-1)
+			console.log("INITIATED RESPONSE",$scope.sender)
 			var decodedMessage = getBody(resp.payload);
    			var messages = []
 			messages.push({'message':decodedMessage,color:'#CCFF90','sender':item.sender.data});
@@ -203,12 +207,15 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		        'id':allThreads[id].id
 		      });
 
+		      console.log("RAW MESSAGE",resp)
+
 		      requestMessage.execute(function(respMessage) {
 
 		        var allMessages = respMessage.messages;
 
 		        lastSenderEmail = allMessages[allMessages.length-1].payload.headers[0].value.split("<")[1].slice(0,-1);
 		        if(lastSenderEmail != ownerEmail){
+
 		        	var sender = appendPre(allMessages[allMessages.length-1].payload.headers[0].value.split("<")[0]);
 		        	var snippet = allMessages[allMessages.length-1].snippet;
 		        	if (snippet.length > 20) {
