@@ -185,37 +185,6 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		});
     };
 
-    $scope.test = function(){
-    	testMail();
-    }
-
-    var testMail = function(){
-    	var requestTEST = gapi.client.gmail.users.threads.list({
-			'userId': 'me',
-			'q': "!subject:''",
-			'maxResults':20
-		});
-
-		requestTEST.execute(function(resp) {
-			var requestTEST2 = gapi.client.gmail.users.messages.get({
-				'userId': 'me',
-				'id':resp.result.threads[0].id,
-				'maxResults':10
-			});
-			requestTEST2.execute(function(resp2){
-				var headers = {
-					'Subject':resp2.payload.headers[16].value,
-					'inReplyTo':resp2.payload.headers[15].value,
-					'References':'',
-					'threadId':resp2.threadId,
-					'to':resp2.payload.headers[17].value.split("<")[1].slice(0,-1)
-				}
-				console.log("HEADERS",headers);
-				$scope.send();
-			});
-		});
-    }
-
     var getInboxStats = function() {		
 
 		var request = gapi.client.gmail.users.getProfile({
@@ -231,8 +200,8 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 
 		request = gapi.client.gmail.users.threads.list({
 			'userId': 'me',
-			'q': "!subject:''",
-			'maxResults':10
+			'q': "in:inbox",
+			'maxResults':20
 		});
 
 		var lastSenderEmail;
