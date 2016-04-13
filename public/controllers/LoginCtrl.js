@@ -1,30 +1,16 @@
 var app = angular.module('LoginApp',['ngMaterial']);
 
-var chatAPI = "http://www.personalityforge.com/api/chat/?apiKey=l248iw9xLwtAo5Hi&chatBotID=63906&message=How+are+you+doing+today%3F&externalID=abc-639184572&firstName=Alex&lastName=Sparrow&gender=m";
+// Google Related variables. Needed for authentication and proper authorization.
 
 var CLIENT_ID = '403395753267-m5bosciaf32n6tmr4otncqigvfd3b2lr.apps.googleusercontent.com';
-
 var apiKey = 'AIzaSyAQSFbNgx0Xs-faGH6o2YxTrlQe9Ds-d94';
-
-var sampleChatResponse = {"success":1,"errorMessage":"","message":{"chatBotName":"Desti","chatBotID":null,"message":"So you say.","emotion":"normal"}}
-
 var SCOPES = ['https://www.googleapis.com/auth/gmail.readonly',
-  'https://www.googleapis.com/auth/gmail.send',
-  'https://www.googleapis.com/auth/gmail.modify',
-  'https://www.googleapis.com/auth/gmail.compose'
+	'https://www.googleapis.com/auth/gmail.send',
+	'https://www.googleapis.com/auth/gmail.modify',
+	'https://www.googleapis.com/auth/gmail.compose'
 ];
 
-// function reqListener () {
-//   console.log(this.responseText);
-// }
-
-// var oReq = new XMLHttpRequest();
-// oReq.addEventListener("load", reqListener);
-// oReq.open("GET", "https://www.googleapis.com/gmail/v1/users/me/messages/15071b210a1ac883?format=metadata&metadataHeaders=In-Reply-To&metadataHeaders=References&metadataHeaders=Message-ID&metadataHeaders=Subject&fields=payload%2Fheaders");
-// oReq.send();
-
-// handleClientLoad();
-
+// Global functons to perform authentication and relate to angular app
 
 function handleClientLoad() {
     // Step 2: Reference the API key
@@ -63,7 +49,7 @@ function handleAuthClick(event) {
 // }
 
 var init = function() {
-  window.initGapi();
+	window.initGapi();
 }
 
 
@@ -74,52 +60,38 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
     var unreadCount = 0;
 
     setInterval(function() {
-	  $scope.refreshUnread();
+		$scope.refreshUnread();
 	}, 7000);
 
     function sendMessage()
 	{
 
-	  var email = '';
+		var email = '';
+		var headers_obj = {
+			'To': $scope.itemToReply.sender,
+			'Subject': $scope.itemToReply.subject,
+			'In-Reply-To':$scope.itemToReply.id,
+			'References':''
+		}
+		var message = $scope.messageToEmail;
 
-	  var headers_obj = {
-	    'To': $scope.itemToReply.sender,
-	    'Subject': $scope.itemToReply.subject,
-	    'In-Reply-To':$scope.itemToReply.id,
-	    'References':''
-	  }
+		for(var header in headers_obj)
+			email += header += ": "+headers_obj[header]+"\r\n";
+			email += "\r\n" + message;
 
-	  console.log(headers_obj)
+			var sendRequest = gapi.client.gmail.users.messages.send({
+			'userId': 'me',
+			'resource': {
+				'raw': window.btoa(email).replace(/\+/g, '-').replace(/\//g, '_'),
+				'threadId':"1540d5e45328ada2"
+				}
+			});
 
-	  // var message = $scope.botResponse;
-	  var message = $scope.messageToEmail;
-
-	  for(var header in headers_obj)
-	    email += header += ": "+headers_obj[header]+"\r\n";
-
-	  email += "\r\n" + message;
-
-	  var sendRequest = gapi.client.gmail.users.messages.send({
-	    'userId': 'me',
-	    'resource': {
-	      'raw': window.btoa(email).replace(/\+/g, '-').replace(/\//g, '_'),
-	      'threadId':"1540d5e45328ada2"
-	    }
-	  });
-
-	  return sendRequest.execute(function(resp){
-	  });
+		return sendRequest.execute(function(resp){
+		});
 	}
 
     $scope.send = function(){
-  //   	var request = gapi.client.gmail.users.messages.send({
-		//   'userId': 'me'
-		// });
-		// var messageRAW = btoa("HELLO MY FRIEND");
-		// request.execute(function(resp) {
-		// 	console.log(resp);
-		// });
-
 		sendMessage();
     }
 
@@ -145,23 +117,23 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
     	var response;
 
     	function reqListener () {
-		  console.log("CHAT BOT RESPONSE",this.responseText);
-		  response = this.responseText;
-		  var responseJ = JSON.parse(response);
-		  console.log(responseJ);
-		  $scope.messageToEmail = responseJ.message.message;
-		  var fullBotResponse = {
+			console.log("CHAT BOT RESPONSE",this.responseText);
+			response = this.responseText;
+			var responseJ = JSON.parse(response);
+			console.log(responseJ);
+			$scope.messageToEmail = responseJ.message.message;
+			var fullBotResponse = {
 	    		'message':responseJ.message.message,
 	    		'color':'#FFD180',
 	    		'sender':$rootScope.owner
-	    	}
+	    	};
 
 	    	$scope.botResponse = responseJ.message.message;
 
 	    	$scope.$applyAsync(function(){
 	    		$scope.chatMessages.messages = message;
 	    		$scope.chatMessages.messages.push(fullBotResponse)
-	    	})
+	    	});
 		}
 		
 		var chatMessage = $scope.itemToReply.snippet.split(" ").join("+");
@@ -187,7 +159,7 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
     };
 
     $scope.chatMessages = {
-    		messages:[]
+    	messages:[]
    	};
 
     $scope.initiateChat = function(item){
@@ -200,21 +172,12 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
     	
     	$scope.threadId = item.threadId;
     	var request = gapi.client.gmail.users.messages.get({
-		  'userId': 'me',
-		  'id':item.id
+			'userId': 'me',
+			'id':item.id
 		});
 		var messageRAW;
 		request.execute(function(resp) {
 			$scope.sender = item.sender;
-			// console.log("RESPONSE FULL",resp)
-			// var encodedBody = getHTMLPart(resp.payload.parts);
-			// encodedBody = encodedBody.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, '');
-			// console.log("ENCODED",encodedBody)
-			// var decoded = decodeURIComponent(escape(window.atob(encodedBody)));
-
-
-			// console.log("RESPONSE", decoded);
-			// var decodedMessage = decoded.replace(/&#39;/g, "'");
 			var decodedMessage = resp.snippet;
    			var messages = []
 			messages.push({'message':decodedMessage,color:'#CCFF90','sender':item.sender,'align':'right'});
@@ -228,48 +191,48 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 
     var testMail = function(){
     	var requestTEST = gapi.client.gmail.users.threads.list({
-		  'userId': 'me',
-		  'q': "!subject:''",
-		  'maxResults':20
+			'userId': 'me',
+			'q': "!subject:''",
+			'maxResults':20
 		});
 
 		requestTEST.execute(function(resp) {
-		  var requestTEST2 = gapi.client.gmail.users.messages.get({
-			  'userId': 'me',
-			  'id':resp.result.threads[0].id,
-			  'maxResults':10
+			var requestTEST2 = gapi.client.gmail.users.messages.get({
+				'userId': 'me',
+				'id':resp.result.threads[0].id,
+				'maxResults':10
 			});
-		  requestTEST2.execute(function(resp2){
-		  	var headers = {
-		  		'Subject':resp2.payload.headers[16].value,
-		  		'inReplyTo':resp2.payload.headers[15].value,
-		  		'References':'',
-		  		'threadId':resp2.threadId,
-		  		'to':resp2.payload.headers[17].value.split("<")[1].slice(0,-1)
-		  	}
-		  	console.log("HEADERS",headers);
-		  	$scope.send();
-		  });
+			requestTEST2.execute(function(resp2){
+				var headers = {
+					'Subject':resp2.payload.headers[16].value,
+					'inReplyTo':resp2.payload.headers[15].value,
+					'References':'',
+					'threadId':resp2.threadId,
+					'to':resp2.payload.headers[17].value.split("<")[1].slice(0,-1)
+				}
+				console.log("HEADERS",headers);
+				$scope.send();
+			});
 		});
     }
 
     var getInboxStats = function() {		
 
 		var request = gapi.client.gmail.users.getProfile({
-		  'userId': 'me',
+			'userId': 'me',
 		});
 
 		var ownerEmail;
 
 		request.execute(function(resp) {
-		  ownerEmail = resp.emailAddress;
-		  $rootScope.owner = ownerEmail;
+			ownerEmail = resp.emailAddress;
+			$rootScope.owner = ownerEmail;
 		});
 
 		request = gapi.client.gmail.users.threads.list({
-		  'userId': 'me',
-		  'q': "!subject:''",
-		  'maxResults':10
+			'userId': 'me',
+			'q': "!subject:''",
+			'maxResults':10
 		});
 
 		var lastSenderEmail;
@@ -279,66 +242,64 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		request.execute(function(resp) {
 			$scope.complete = false;
 
-		  var allThreads = resp.threads;
+			var allThreads = resp.threads;
 
-		  if (allThreads.length>0) {
-		    threadCount = allThreads.length;
-		    for (var id = 0; id < threadCount; id++) {
-		    	$scope.$applyAsync(function(){
-			    	$scope.idRAW = id;		    		
-		    	});
+			if (allThreads.length>0) {
+				threadCount = allThreads.length;
+			    for (var id = 0; id < threadCount; id++) {
+			    	$scope.$applyAsync(function(){
+				    	$scope.idRAW = id;		    		
+			    	});
 
-		      var requestMessage = gapi.client.gmail.users.messages.get({
-		        'userId': 'me',
-				'id':allThreads[id].id,
-				'maxResults':10
-		      });
+					var requestMessage = gapi.client.gmail.users.messages.get({
+						'userId': 'me',
+						'id':allThreads[id].id,
+						'maxResults':10
+					});
 
-		      requestMessage.execute(function(respMessage) {
+					requestMessage.execute(function(respMessage) {
 
-		        var allMessages = respMessage;
+						var allMessages = respMessage;
 
-		        if(allMessages.payload.headers.length == 20 && allMessages.payload){
+						if(allMessages.payload.headers.length == 20 && allMessages.payload){
 
-		        	for (var object = 0; object < allMessages.payload.headers.length; object++) {
-		        		if (allMessages.payload.headers[object].name == "From"){
-		        			lastSenderEmail = allMessages.payload.headers[object].value.split("<")[1].slice(0,-1);
-		        		}
-		        		if (allMessages.payload.headers[object].name == "Subject"){
-		        			threadSubject = allMessages.payload.headers[object].value;
-		        		}
-		        	}
-			        if(lastSenderEmail != ownerEmail){
-			        	var sender = lastSenderEmail;
-			        	var snippet = allMessages.snippet;
-			        	if (snippet.length > 40) {
-			        		snippet = snippet.substring(0,40) + "..."
-			        	}
-			        	var historyId = allMessages.historyId;
-			        	var time_stamp = allMessages.internalDate;
-			        	var messageID = allMessages.id;
-			        	var newMessage = {sender: sender,
-			        						snippet:snippet.replace(/&#39;/g, "'"),
-			        						historyId:historyId,
-			        						id:messageID,
-			        						time_stamp:time_stamp,
-			        						subject:threadSubject};
-			          	$scope.userMessagesRAW.push(newMessage);
-			          	
-			          	if(id == threadCount){
-			          		messageListener($scope.userMessagesRAW);
-			          	}	
-			        }
-		        }
-
-		        
-		      });
-		    }
-		  }
-		  else {
-		    userMessages.push({snippet:"NO MESSAGES FOUND"});
-		    messageListener(userMessages);
-		  }
+							for (var object = 0; object < allMessages.payload.headers.length; object++) {
+								if (allMessages.payload.headers[object].name == "From"){
+									lastSenderEmail = allMessages.payload.headers[object].value.split("<")[1].slice(0,-1);
+								}
+								if (allMessages.payload.headers[object].name == "Subject"){
+									threadSubject = allMessages.payload.headers[object].value;
+								}
+							}
+						    if(lastSenderEmail != ownerEmail){
+						    	var sender = lastSenderEmail;
+						    	var snippet = allMessages.snippet;
+						    	if (snippet.length > 40) {
+						    		snippet = snippet.substring(0,40) + "..."
+						    	}
+						    	var historyId = allMessages.historyId;
+						    	var time_stamp = allMessages.internalDate;
+						    	var messageID = allMessages.id;
+						    	var newMessage = {sender: sender,
+						    						snippet:snippet.replace(/&#39;/g, "'"),
+						    						historyId:historyId,
+						    						id:messageID,
+						    						time_stamp:time_stamp,
+						    						subject:threadSubject};
+						      	$scope.userMessagesRAW.push(newMessage);
+						      	
+						      	if(id == threadCount){
+						      		messageListener($scope.userMessagesRAW);
+						      	}	
+						    }
+						}
+					});
+		    	}
+		  	}
+		  	else {
+		    	userMessages.push({snippet:"NO MESSAGES FOUND"});
+		    	messageListener(userMessages);
+		  	}
 		});
 	}
 
@@ -355,21 +316,17 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 	}
 
 	function getHTMLPart(arr) {
-	for(var x = 0; x <= arr.length; x++)
-	{
-	  if(typeof arr[x].parts === 'undefined')
-	  {
-	    if(arr[x].mimeType === 'text/html')
-	    {
-	      return arr[x].body.data;
-	    }
-	  }
-	  else
-	  {
-	    return getHTMLPart(arr[x].parts);
-	  }
-	}
-	return '';
+		for(var x = 0; x <= arr.length; x++){
+			if(typeof arr[x].parts === 'undefined'){
+			    if(arr[x].mimeType === 'text/html'){
+			      	return arr[x].body.data;
+			    }
+			}
+		  	else{
+		    	return getHTMLPart(arr[x].parts);
+		  	}
+		}
+		return '';
 	}
 
 	/**
@@ -396,7 +353,7 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 });
 
 app.service('gapiService', function() {
-  this.initGapi = function(postInitiation) {
-    gapi.client.load('gmail', 'v1', postInitiation);
-  }
+	this.initGapi = function(postInitiation) {
+		gapi.client.load('gmail', 'v1', postInitiation);
+	}
 });
