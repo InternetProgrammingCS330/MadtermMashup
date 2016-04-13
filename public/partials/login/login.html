@@ -5,6 +5,7 @@
           <span>HANGOUTS BOT</span>
         </h2>
       </md-toolbar>
+      <md-button class="md-raised md-primary" aria-label="test" ng-click="test()" >send</md-button>
       <md-content class="md-padding" layout-xs="column" layout="row">
         <div flex-xs flex-gt-xs="50" layout="row" class="ng-cloak">
             
@@ -21,7 +22,7 @@
               <md-list>
                 <md-list-item class="md-3-line" ng-repeat="item in userMessages">
                   <div class="md-list-item-text" class="ng-cloak">
-                    <h3>{{item.sender.data}}</h3>
+                    <h3>{{item.sender}}</h3>
                     <p>{{item.snippet}}</p>
                   </div>
                   
@@ -47,7 +48,7 @@
             <md-card-content>
               <md-list>
                 <md-list-item class="md-3-line" ng-repeat="item in chatMessages.messages" ng-style="{background: item.color}">
-                  <div class="md-list-item-text" style="text-align: right;">
+                  <div class="md-list-item-text" style="text-align: {{item.align}};">
                     <h2><b>{{item.sender}}</b></h2>
                     <p>{{item.message}}</p>
                   </div>
@@ -62,6 +63,7 @@
           </div>
         </md-content>
       <button id="authorize-button" style="visibility: hidden">Authorize</button>
+
       <script src="https://apis.google.com/js/client.js?onload=handleClientLoad"></script>
     </div>
 
