@@ -83,11 +83,26 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 			'userId': 'me',
 			'resource': {
 				'raw': window.btoa(email).replace(/\+/g, '-').replace(/\//g, '_'),
-				'threadId':"1540d5e45328ada2"
+				'threadId': $scope.info.id
 				}
 			});
 
 		return sendRequest.execute(function(resp){
+			var sample = {
+				'userId':'me',
+			    'id': $scope.info[0].threadId,
+			    'removeLabelIds': ["UNREAD"]
+			}
+			var request = gapi.client.gmail.users.messages.modify({
+				'userId':'me',
+			    'id': $scope.info[0].threadId,
+			    'removeLabelIds': ["UNREAD"]
+			});
+			console.log("REQUEST MESSAGE",sample)
+			console.log("SCOPE", $scope.info[0])
+		  	request.execute(function(){
+		  		console.log("marked as read");
+		  	});
 		});
 	}
 
@@ -110,6 +125,17 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
     	$scope.$applyAsync(function(){
     		message=$(message).sort(sortDate);
     		$scope.userMessages = message;
+    		var fullMessage = "You have 1 new message from: " + message[0].senderName + " titled '"+message[0].subject+"'. The message reads: "+ message[0].full;
+    		window.responsiveVoice.speak(fullMessage);
+    		// var utterance = new SpeechSynthesisUtterance(message[0].snippet);
+    		// window.speechSynthesis.speak(utterance);
+
+   //  		var request = gapi.client.plus.people.get({
+			//    'userId': 'me'
+			// });
+			// request.execute(function(resp) {
+			//    console.log('Retrieved profile for:' + resp.displayName);
+			// });
     	})
     }
 
@@ -117,10 +143,8 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
     	var response;
 
     	function reqListener () {
-			console.log("CHAT BOT RESPONSE",this.responseText);
 			response = this.responseText;
 			var responseJ = JSON.parse(response);
-			console.log(responseJ);
 			$scope.messageToEmail = responseJ.message.message;
 			var fullBotResponse = {
 	    		'message':responseJ.message.message,
@@ -139,7 +163,6 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		var chatMessage = $scope.itemToReply.snippet.split(" ").join("+");
 		var chatAPI = "http://www.personalityforge.com/api/chat/?apiKey=l248iw9xLwtAo5Hi&chatBotID=63906&message="+chatMessage+"%3F&externalID=abc-639184572&firstName=Alex&lastName=Sparrow&gender=m";
 		
-		console.log("CHAT BOT",chatAPI);
 		var oReq = new XMLHttpRequest();
 		oReq.addEventListener("load", reqListener);
 		oReq.open("GET", chatAPI);
@@ -178,12 +201,18 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		var messageRAW;
 		request.execute(function(resp) {
 			$scope.sender = item.sender;
-			var decodedMessage = resp.snippet;
+			var decodedMessage = resp.snippet.replace(/&#39;/g, "'");
    			var messages = []
 			messages.push({'message':decodedMessage,color:'#CCFF90','sender':item.sender,'align':'right'});
+
+	  //   	var utterance = new SpeechSynthesisUtterance(decodedMessage);
+			// // window.responsiveVoice.speak(decodedMessage);
+			// window.speechSynthesis.speak(decodedMessage);
 			chatListener(messages)
 		});
     };
+
+    var oldJSON;
 
     var getInboxStats = function() {		
 
@@ -200,8 +229,8 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 
 		request = gapi.client.gmail.users.threads.list({
 			'userId': 'me',
-			'q': "in:inbox",
-			'maxResults':20
+			'q': "is:unread AND in:inbox",
+			'maxResults':1
 		});
 
 		var lastSenderEmail;
@@ -213,7 +242,7 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 
 			var allThreads = resp.threads;
 
-			if (allThreads.length>0) {
+			if (resp.resultSizeEstimate > 0) {
 				threadCount = allThreads.length;
 			    for (var id = 0; id < threadCount; id++) {
 			    	$scope.$applyAsync(function(){
@@ -223,18 +252,23 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 					var requestMessage = gapi.client.gmail.users.messages.get({
 						'userId': 'me',
 						'id':allThreads[id].id,
-						'maxResults':10
+						'maxResults':1,
+						'format':'full'
 					});
+
+					$scope.threadIdT = allThreads[id].id;
 
 					requestMessage.execute(function(respMessage) {
 
 						var allMessages = respMessage;
+						var fingMessage =  decodeURIComponent(escape(window.atob(respMessage.payload.parts[0].body.data.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, ''))));
 
-						if(allMessages.payload.headers.length == 20 && allMessages.payload){
+						if(allMessages.payload.headers.length > 12 && allMessages.payload){
 
 							for (var object = 0; object < allMessages.payload.headers.length; object++) {
 								if (allMessages.payload.headers[object].name == "From"){
 									lastSenderEmail = allMessages.payload.headers[object].value.split("<")[1].slice(0,-1);
+									lastSenderName = allMessages.payload.headers[object].value.split("<")[0];
 								}
 								if (allMessages.payload.headers[object].name == "Subject"){
 									threadSubject = allMessages.payload.headers[object].value;
@@ -242,23 +276,35 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 							}
 						    if(lastSenderEmail != ownerEmail){
 						    	var sender = lastSenderEmail;
+						    	var senderName = lastSenderName;
 						    	var snippet = allMessages.snippet;
 						    	if (snippet.length > 40) {
-						    		snippet = snippet.substring(0,40) + "..."
+						    		snippet = snippet
 						    	}
 						    	var historyId = allMessages.historyId;
 						    	var time_stamp = allMessages.internalDate;
 						    	var messageID = allMessages.id;
 						    	var newMessage = {sender: sender,
+						    						senderName: senderName,
 						    						snippet:snippet.replace(/&#39;/g, "'"),
+						    						full:fingMessage.replace(/&#39;/g, "'"),
 						    						historyId:historyId,
 						    						id:messageID,
 						    						time_stamp:time_stamp,
+						    						threadId: $scope.threadIdT,
 						    						subject:threadSubject};
 						      	$scope.userMessagesRAW.push(newMessage);
+						      	$scope.info = $scope.userMessagesRAW;
 						      	
 						      	if(id == threadCount){
-						      		messageListener($scope.userMessagesRAW);
+						      		if(oldJSON == $scope.userMessagesRAW[0].snippet){
+						      			$scope.userMessagesRAW = {};
+						      		}
+						      		else{
+						      			oldJSON = $scope.userMessagesRAW[0].snippet;
+						      			messageListener($scope.userMessagesRAW);
+						      		}
+						      		
 						      	}	
 						    }
 						}
@@ -266,21 +312,24 @@ app.controller('loginController', function($timeout, $scope, $http, $location, $
 		    	}
 		  	}
 		  	else {
+		    	var userMessages = []
 		    	userMessages.push({snippet:"NO MESSAGES FOUND"});
-		    	messageListener(userMessages);
 		  	}
 		});
 	}
 
 	function getBody(message) {
 		var encodedBody = '';
-		if(typeof message.parts === 'undefined'){
-			encodedBody = message.body.data;
+		var temp = '';
+		for (var i = 0; i < message.parts.length; i++) {
+			if(typeof message.parts === 'undefined'){
+				temp = message.body.data;
+			}
+			else{
+				temp = getHTMLPart(message.parts[i]);
+			}
+			encodedBody = encodedBody + temp.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, '');
 		}
-		else{
-			encodedBody = getHTMLPart(message.parts[0]);
-		}
-		encodedBody = encodedBody.replace(/-/g, '+').replace(/_/g, '/').replace(/\s/g, '');
 		return decodeURIComponent(escape(window.atob(encodedBody)));
 	}
 
